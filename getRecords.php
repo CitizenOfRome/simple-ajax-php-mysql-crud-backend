@@ -11,10 +11,10 @@ try {
         $query .= 'WHERE ';
         $queryParts = array();
         if(!empty($searchName)) {
-            $queryParts []= ' name LIKE :name ';
+            $queryParts []= ' name LIKE CONCAT(\'%\', :name, \'%\')';
         }
         if(!empty($searchSpecialization)) {
-            $queryParts []= ' specialization LIKE :specialization ';
+            $queryParts []= ' specialization LIKE CONCAT(\'%\', :specialization, \'%\')';
         }
         if(!empty($searchAge)) {
             $queryParts []= ' age=:age ';
@@ -23,10 +23,10 @@ try {
     }
     $stmt = $conn->prepare($query);
     if(!empty($searchName)) {
-        $stmt->bindParam(':name', '%'.$searchName.'%', PDO::PARAM_STR);
+        $stmt->bindParam(':name', $searchName);
     }
     if(!empty($searchSpecialization)) {
-        $stmt->bindParam(':specialization', '%'.$searchSpecialization.'%', PDO::PARAM_STR);
+        $stmt->bindParam(':specialization', $searchSpecialization);
     }
     if(!empty($searchAge)) {
         $stmt->bindParam(':age', $searchAge);
