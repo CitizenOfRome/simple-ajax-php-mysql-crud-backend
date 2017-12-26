@@ -3,12 +3,39 @@ try {
     $conn = require('./includes/getPDOConnection.php');
 
     // prepare sql and bind parameters
-    $stmt = $conn->prepare("SELECT * FROM students");
+    $searchName = $_GET['searchName'];
+    $searchSpecialization = $_GET['searchSpecialization'];
+    $searchAge = $_GET['searchAge'];
+    $query = "SELECT * FROM students ";
+    if(!empty($searchName) || !empty($searchSpecialization) || !empty($searchAge)) {
+        $query .= 'WHERE ';
+        $queryParts = array();
+        if(!empty($searchName)) {
+            $queryParts []= ' name LIKE :name ';
+        }
+        if(!empty($searchSpecialization)) {
+            $queryParts []= ' specialization LIKE :specialization ';
+        }
+        if(!empty($searchAge)) {
+            $queryParts []= ' age=:age ';
+        }
+        $query .= implode(' AND ', $queryParts);
+    }
+    $stmt = $conn->prepare($query);
+    if(!empty($searchName)) {
+        $stmt->bindParam(':name', '%'.$searchName.'%', PDO::PARAM_STR);
+    }
+    if(!empty($searchSpecialization)) {
+        $stmt->bindParam(':specialization', '%'.$searchSpecialization.'%', PDO::PARAM_STR);
+    }
+    if(!empty($searchAge)) {
+        $stmt->bindParam(':age', $searchAge);
+    }
     $success = $stmt->execute();
 
     $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     echo json_encode($result, JSON_FORCE_OBJECT);
 } catch(PDOException $e) {
-    echo "Error: " . $e->getMessage();
+    echo json_encode(array('message' => "Error: " . $e->getMessage(), 'success' => false));
 }
